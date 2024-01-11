@@ -10,6 +10,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+#import WordCloud  # You need to install this package
+import re  
+import matplotlib.pyplot as plt  
+from wordcloud import wordcloud
 
 def load_movies_df():
     movies_df_filename = 'movies_df.pkl'
@@ -83,6 +87,53 @@ def show_similarity_bar_chart(recommended_movies, sim_scores):
     chart_widget = chart.get_tk_widget()
     chart_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+############################################################
+def show_genre_distribution(movies_df):
+    global chart_frame
+    
+    # Clear previous chart
+    for widget in chart_frame.winfo_children():
+        widget.destroy()
+
+        fig, ax = plt.subplots()
+
+    # Check if 'genres' column exists and is not empty
+    if 'genres' in movies_df and not movies_df['genres'].empty:
+        # Count the occurrences of each genre
+        genre_counts = movies_df['genres'].str.split(' ').explode().value_counts().head(10)
+        
+        if not genre_counts.empty:
+            # Generate pie chart
+            fig, ax = plt.subplots()
+            ax.pie(genre_counts, labels=genre_counts.index, autopct='%1.1f%%', startangle=90)
+            ax.axis('equal')  # Equal aspect ratio ensures pie is drawn as a circle.
+        else:
+            print("No genre data available for pie chart.")
+            return
+    else:
+        print("No 'genres' column found in DataFrame.")
+        return
+    
+    chart = FigureCanvasTkAgg(fig, master=chart_frame)
+    chart_widget = chart.get_tk_widget()
+    chart_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+def show_keyword_wordcloud(movies_df):
+    global chart_frame
+    all_keywords = ' '.join(movies_df['keywords'])
+    wc = wordcloud.WordCloud(width=800, height=400, background_color='white').generate(all_keywords)
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor='k')
+    ax.imshow(wc, interpolation='bilinear')
+    ax.axis('off')
+    chart = FigureCanvasTkAgg(fig, master=chart_frame)
+    chart_widget = chart.get_tk_widget()
+    chart_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+
+
+    
+
+    ##################################################3
 def update_gui_with_results(movies_df, tfidf_matrix, user_input_title):
     global recommendations_label, chart_frame
     recommendations, sim_scores = get_recommendations(user_input_title, movies_df, tfidf_matrix)
@@ -93,8 +144,12 @@ def update_gui_with_results(movies_df, tfidf_matrix, user_input_title):
         # Update accuracy (dummy value for now)
         accuracy = 0.85  # Replace with actual accuracy calculation
         accuracy_label.config(text=f"Model Accuracy: {accuracy * 100:.2f}%")
+        
 
         show_similarity_bar_chart(recommendations, sim_scores)
+        show_genre_distribution(movies_df)
+        show_keyword_wordcloud(movies_df)
+
 
 def on_recommend():
     user_input_title = movie_input.get()
