@@ -84,11 +84,17 @@ def show_similarity_bar_chart(recommended_movies, sim_scores, chart_frame):
     for widget in chart_frame.winfo_children():
         widget.destroy()
 
-    fig, ax = plt.subplots()
+    # Adjust the figure size as needed
+    fig, ax = plt.subplots(figsize=(8, 4))  # Reduced height for better fit
+
     ax.barh(recommended_movies, sim_scores)
     ax.set_xlabel('Similarity Score')
     ax.set_ylabel('Recommended Movies')
     ax.set_title('Similarity of Recommended Movies to User\'s Choice')
+
+    # Adjust layout and padding
+    plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
+    plt.tight_layout(pad=3.0)
 
     chart = FigureCanvasTkAgg(fig, master=chart_frame)
     chart_widget = chart.get_tk_widget()
