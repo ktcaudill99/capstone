@@ -1,3 +1,7 @@
 pandas
 scikit-learn
 numpy
+matplotlib 
+sklearn
+wordcloud 
+networkx
