@@ -168,10 +168,10 @@ def update_gui_with_results(movies_df, tfidf_matrix, user_input_title):
         show_keyword_wordcloud(movies_df, recommendations, keyword_chart_frame)
         show_similarity_bar_chart(recommendations, sim_scores, chart_frame)
 
-        accuracy = 0.85  # Replace with actual accuracy calculation
-        accuracy_label.config(text=f"Model Accuracy: {accuracy * 100:.2f}%")
+      #  accuracy = 0.85  # Replace with actual accuracy calculation
+      #  accuracy_label.config(text=f"Model Accuracy: {accuracy * 100:.2f}%")
     else:
-        recommendations_label.config(text="No recommendations found. Please try another movie title.")
+        recommendations_label.config(text="No recommendations found. \n Please try another movie title or check capitalization and spelling.")
 
 
 
@@ -194,7 +194,7 @@ def on_recommend():
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Movie Recommender")
-    root.geometry("1200x800")
+    root.geometry("1500x800")
 
     # Create input label and entry field
     label = tk.Label(root, text="Enter a movie title to get recommendations:")
@@ -220,10 +220,10 @@ if __name__ == "__main__":
     keyword_chart_frame.grid(row=4, column=1, padx=10, pady=10, sticky="nsew")
 
     # Initialize labels and pack them in their respective frames
-    recommendations_label = tk.Label(recommendations_frame, text="Recommendations will appear here", justify=tk.LEFT)
+    recommendations_label = tk.Label(recommendations_frame, text="", justify=tk.LEFT)
     recommendations_label.pack(fill=tk.BOTH, expand=True)
 
-    accuracy_label = tk.Label(recommendations_frame, text="Model Accuracy: 0%")
+    accuracy_label = tk.Label(recommendations_frame, text="")
     accuracy_label.pack(fill=tk.BOTH, expand=True)
 
     # Load data and prepare model
