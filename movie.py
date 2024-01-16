@@ -10,13 +10,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-#pip install wordcloud networkx
-#install wordcloud and networkx
 from wordcloud import WordCloud
 import networkx as nx
 from itertools import combinations
-#pip install --upgrade networkx
 
+
+# Function to load the movies DataFrame from pickled data or from scratch if the pickled data does not exist
 def load_movies_df():
     movies_df_filename = 'movies_df.pkl'
     if os.path.isfile(movies_df_filename):
@@ -53,23 +52,29 @@ def load_movies_df():
                                         movies_df['crew'])
         print("[+] Data set preprocessing complete")
 
+        # Pickle the DataFrame for future use 
         with open(movies_df_filename, 'wb') as fout:
             pickle.dump(movies_df, fout)
         print("[+] Pickled movies_df")
 
     return movies_df
 
+# Function to parse JSON list string into a space-separated string of names 
 def parse_json_list(str):
     parsed_list = ast.literal_eval(str)
     return ' '.join([item['name'] for item in parsed_list])
 
+# Global variables for GUI elements and data sets 
 recommendations_label = None
 accuracy_label = None
 chart_frame = None
 genre_chart_frame = None
 keyword_chart_frame = None
 
+# Function to get recommendations based on user's choice of movie title and similarity scores for the recommendations 
 def get_recommendations(title, movies_df, tfidf_matrix):
+
+    # Check if title exists in DataFrame and get index of it if it does exist 
     if title not in movies_df['original_title'].values:
         return None, None
     idx = movies_df.index[movies_df['original_title'] == title].tolist()[0]
@@ -78,8 +83,11 @@ def get_recommendations(title, movies_df, tfidf_matrix):
     sim_scores = cos_sim[0, sim_movie_idx]
     sim_movie_idx = np.flip(sim_movie_idx)[1:]
     sim_scores = np.flip(sim_scores)[1:]
+
+    # Return the top 10 most similar movies
     return movies_df['original_title'].iloc[sim_movie_idx], sim_scores
 
+# Function to show similarity bar chart
 def show_similarity_bar_chart(recommended_movies, sim_scores, chart_frame):
     for widget in chart_frame.winfo_children():
         widget.destroy()
@@ -96,11 +104,10 @@ def show_similarity_bar_chart(recommended_movies, sim_scores, chart_frame):
     plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
     plt.tight_layout(pad=3.0)
 
+    # Display the bar chart
     chart = FigureCanvasTkAgg(fig, master=chart_frame)
     chart_widget = chart.get_tk_widget()
     chart_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-################################################################
-    
 
 # Function to show genre distribution
 def show_genre_distribution(movies_df, recommended_movies, genre_chart_frame):
@@ -115,6 +122,7 @@ def show_genre_distribution(movies_df, recommended_movies, genre_chart_frame):
     ax.pie(genre_counts, labels=genre_counts.index, autopct='%1.1f%%', startangle=90)
     ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 
+    # Display the pie chart
     chart = FigureCanvasTkAgg(fig, master=genre_chart_frame)
     chart_widget = chart.get_tk_widget()
     chart_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
@@ -133,32 +141,29 @@ def show_keyword_wordcloud(movies_df, recommended_movies, frame):
     ax.imshow(wordcloud, interpolation='bilinear')
     ax.axis('off')
 
+    # Display the word cloud
     chart = FigureCanvasTkAgg(fig, master=frame)
     chart_widget = chart.get_tk_widget()
     chart_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-
-
-
-
-    ##################################################################
-
-
+# Function to clear a frame
 def clear_frame(frame):
     for widget in frame.winfo_children():
         widget.destroy()
 
-
-
+# Function to update the GUI with recommendations
 def update_gui_with_results(movies_df, tfidf_matrix, user_input_title):
     global recommendations_label, genre_chart_frame, keyword_chart_frame, accuracy_label, chart_frame
    
+    # Clear the frames
     clear_frame(genre_chart_frame)
     clear_frame(keyword_chart_frame)
     clear_frame(chart_frame)
 
+    # Get recommendations and similarity scores
     recommendations, sim_scores = get_recommendations(user_input_title, movies_df, tfidf_matrix)
     
+    # Update the GUI    
     if recommendations is not None and len(recommendations) > 0:
         recommendation_text = "\n".join([f"{idx+1}. {title}" for idx, title in enumerate(recommendations)])
         recommendations_label.config(text=recommendation_text)
@@ -174,7 +179,7 @@ def update_gui_with_results(movies_df, tfidf_matrix, user_input_title):
         recommendations_label.config(text="No recommendations found. \n Please try another movie title or check capitalization and spelling.")
 
 
-
+# Function to handle the 'Recommend' button click
 def on_recommend():
     global recommendations_label, accuracy_label
 
@@ -191,6 +196,7 @@ def on_recommend():
         accuracy_label = tk.Label(accuracy_frame, text="Model Accuracy: 0%")
         accuracy_label.pack()
 
+# Main function to create the GUI and run the application loop
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Movie Recommender")
